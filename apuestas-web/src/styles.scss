@@ -1,4 +1,39 @@
-/* Reset y Estilos Globales - BetPulse */
+/* ==========================================================
+   Reset y Estilos Globales - BetPulse
+   ========================================================== */
+
+/* --- CSS Custom Properties (Paleta compartida para los 3 módulos) --- */
+:root {
+  /* Fondos */
+  --bg-primary: #0b0e14;
+  --bg-surface: #151c28;
+  --bg-surface-hover: #1e2838;
+  --bg-header: #0e1420;
+
+  /* Bordes */
+  --border-color: #243042;
+  --border-active: #3b82f6;
+
+  /* Acentos */
+  --accent-green: #00e676;
+  --accent-green-dark: #00c853;
+  --accent-gold: #ffb300;
+
+  /* Estados */
+  --color-pendiente: #eab308;
+  --color-ganada: #22c55e;
+  --color-perdida: #ef4444;
+
+  /* Texto */
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* Sombras */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Reset global --- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -7,8 +42,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #0b0e14;
-  color: #f8fafc;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }

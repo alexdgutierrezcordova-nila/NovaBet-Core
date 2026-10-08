@@ -3,8 +3,8 @@ import { OpcionSeleccionada } from '../eventos/evento.model';
 export type EstadoTicket = 'PENDIENTE' | 'GANADA' | 'PERDIDA' | 'ANULADA';
 
 export interface TicketApuesta {
-  id: string;
-  usuarioId: string;
+  _id: string;                    // MongoDB ObjectId serializado como string
+  usuarioId: string;              // Siempre 'usr-demo' para este MVP
   eventoId: string;
   eventoResumen: {
     partido: string;
