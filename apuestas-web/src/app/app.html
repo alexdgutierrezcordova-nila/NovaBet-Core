@@ -1,14 +1,38 @@
 <div class="layout-wrapper">
-  <app-header></app-header>
+  <!-- Módulo 3: Header y Saldo (Integrante 3) -->
+  <header class="app-header">
+    <div class="logo">
+      <span class="icon">⚡</span>
+      <span class="text">BET<span class="highlight">PULSE</span></span>
+    </div>
+    <div class="header-placeholder">
+      <!-- Aquí Integrante 3 integrará su componente app-header con el saldo -->
+      <span class="slot-badge">Módulo 3: Header & Billetera</span>
+    </div>
+  </header>
 
   <main class="main-content">
-    <div class="cartelera-column">
-      <app-cartelera></app-cartelera>
-    </div>
+    <!-- Módulo 1: Cartelera Deportiva (Integrante 1) -->
+    <section class="cartelera-section">
+      <div class="module-placeholder">
+        <h3>⚽ Cartelera Deportiva (Módulo 1)</h3>
+        <p>Aquí el Integrante 1 renderizará el componente de eventos y cuotas.</p>
+      </div>
+    </section>
 
-    <aside class="sidebar-column">
-      <app-betslip></app-betslip>
-      <app-historial></app-historial>
+    <!-- Barra Lateral para Módulos 2 y 3 -->
+    <aside class="sidebar-section">
+      <!-- Módulo 2: Cupón de Apuestas (Integrante 2) -->
+      <div class="module-placeholder betslip-slot">
+        <h3>🎟️ Cupón de Apuestas (Módulo 2)</h3>
+        <p>Aquí el Integrante 2 renderizará el Betslip interactivo.</p>
+      </div>
+
+      <!-- Módulo 3: Historial de Apuestas (Integrante 3) -->
+      <div class="module-placeholder historial-slot">
+        <h3>📜 Historial de Apuestas (Módulo 3)</h3>
+        <p>Aquí el Integrante 3 renderizará la lista de tickets apostados.</p>
+      </div>
     </aside>
   </main>
 </div>

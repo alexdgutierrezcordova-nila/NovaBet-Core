@@ -5,59 +5,60 @@
 
 ---
 
-## 🎯 Arquitectura del Proyecto (Monorepo)
+## 🎯 Arquitectura del Proyecto (Módulos Verticales de Negocio)
+
+El proyecto utiliza un enfoque **Full-Stack por Feature (Vertical Slices)**. Cada integrante es responsable de un módulo de negocio completo de principio a fin (Datos en MongoDB, Endpoints en NestJS y Componentes en Angular):
 
 ```text
 Apuestas/
 ├── docs/                      ← Guías técnicas y contratos para cada integrante
 │   ├── 00-contrato-global-mvp.md
-│   ├── 01-modulo-eventos-datos.md
-│   ├── 02-modulo-motor-apuestas.md
-│   └── 03-modulo-interfaz-web.md
+│   ├── 01-modulo-eventos.md           (Guía completa para Integrante 1)
+│   ├── 02-modulo-betslip.md           (Guía completa para Integrante 2)
+│   └── 03-modulo-billetera-usuario.md (Guía completa para Integrante 3)
+│
 ├── apuestas-web/              ← Frontend Angular 22 (SSR, Standalone, Signals)
 │   └── src/app/
-│       ├── domains/           ← Modelos y servicios compartidos (eventos, apuestas)
-│       ├── shared/ui/         ← UI agnóstica (header con saldo virtual)
-│       └── features/          ← Cartelera deportiva, Betslip y Historial
+│       ├── domains/           ← Interfaces y modelos del contrato compartido
+│       ├── shared/ui/header/  ← Módulo 3: Header con saldo (Integrante 3)
+│       └── features/
+│           ├── cartelera/     ← Módulo 1: Tarjetas de partidos y cuotas (Integrante 1)
+│           ├── betslip/       ← Módulo 2: Cupón de apuestas interactivo (Integrante 2)
+│           └── historial/     ← Módulo 3: Historial de tickets apostados (Integrante 3)
+│
 └── apuestas-api/              ← Backend NestJS 11 + Mongoose 8
     └── src/
-        ├── eventos/           ← Módulo 1 (Persistencia, catálogo y resultados)
-        ├── apuestas/          ← Módulo 2 (Motor de cálculo, tickets y liquidación)
-        └── usuario/           ← Módulo 2 (Billetera virtual y control de saldo)
+        ├── eventos/           ← Módulo 1: Catálogo de partidos y resultados (Integrante 1)
+        ├── apuestas/          ← Módulo 2: Motor de validación y tickets (Integrante 2)
+        └── usuario/           ← Módulo 3: Billetera virtual y saldo (Integrante 3)
 ```
 
 ---
 
-## 👥 Asignación por Integrante y Ramas de Git
+## 👥 Asignación de Módulos y Ramas de Git
 
-| Integrante | Rol Técnico | Módulo | Rama Git | Issue |
+| Integrante | Módulo Asignado | Alcance Full-Stack | Rama Git | Issue |
 |---|---|---|---|---|
-| **Integrante 1** | Datos & Persistencia | Módulo 1: Catálogo de Eventos | `feature/modulo-eventos-datos` | `#1` |
-| **Integrante 2** | Lógica & Backend | Módulo 2: Motor de Apuestas y Billetera | `feature/modulo-motor-apuestas` | `#2` |
-| **Integrante 3** | Frontend & UI/UX | Módulo 3: Interfaz Web y Betslip | `feature/modulo-interfaz-web` | `#3` |
+| **Integrante 1** | **Módulo 1: Eventos & Cartelera** | Partidos en Mongo + API de consulta/resultados + Tarjetas de cuotas en Angular | `feature/modulo-eventos` | `#1` |
+| **Integrante 2** | **Módulo 2: Apuestas & Betslip** | Tickets en Mongo + API de emisión/cálculo + Cupón de apuestas en Angular | `feature/modulo-betslip` | `#2` |
+| **Integrante 3** | **Módulo 3: Billetera & Historial** | Usuario/Saldo en Mongo + API de balance/recarga + Header e Historial en Angular | `feature/modulo-billetera-usuario` | `#3` |
 
-Cada integrante debe leer su guía en [`docs/`](./docs/) antes de comenzar a trabajar en su rama.
+Cada integrante debe consultar su guía detallada en [`docs/`](./docs/) antes de comenzar.
 
 ---
 
-## 🚀 Cómo Ejecutar el Proyecto en Local
+## 🚀 Cómo Iniciar el Proyecto en Local
 
-### 1. Iniciar el Backend (`apuestas-api`)
-Requiere tener MongoDB corriendo en `localhost:27017` (o configurar `MONGODB_URI` en `.env`).
-
+### 1. Backend (`apuestas-api`)
 ```bash
 cd apuestas-api
-npm install
 npm run start:dev
 ```
-> La API estará disponible en: `http://localhost:3000/api`
+> Servidor disponible en: `http://localhost:3000/api`
 
-### 2. Iniciar el Frontend (`apuestas-web`)
-El frontend ya incluye datos simulados (*Mock*) en `domains/eventos/eventos.mock.ts` para poder probarse inmediatamente:
-
+### 2. Frontend (`apuestas-web`)
 ```bash
 cd apuestas-web
-npm install
 npm run start
 ```
-> La aplicación web abrirá en: `http://localhost:4200`
+> Aplicación web disponible en: `http://localhost:4200`
