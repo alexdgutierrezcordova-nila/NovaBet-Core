@@ -1,0 +1,53 @@
+<section class="cartelera-container">
+  <div class="cartelera-header">
+    <h2>⚽ Partidos Destacados</h2>
+    <span class="subtitle">Selecciona una cuota para agregarla a tu cupón de apuestas</span>
+  </div>
+
+  <div class="eventos-grid">
+    @for (evento of eventos(); track evento.id) {
+      <div class="evento-card">
+        <div class="evento-meta">
+          <span class="liga-badge">{{ evento.liga }}</span>
+          <span class="fecha">{{ evento.fecha | date:'shortTime' }}</span>
+        </div>
+
+        <div class="equipos">
+          <div class="equipo local">
+            <span class="nombre">{{ evento.equipoLocal }}</span>
+          </div>
+          <div class="vs">VS</div>
+          <div class="equipo visitante">
+            <span class="nombre">{{ evento.equipoVisitante }}</span>
+          </div>
+        </div>
+
+        <div class="cuotas-panel">
+          <button 
+            class="btn-cuota" 
+            [class.activa]="esSeleccionada(evento.id, 'LOCAL')"
+            (click)="seleccionar(evento, 'LOCAL')">
+            <span class="label">1</span>
+            <span class="valor">{{ evento.cuotas.local | number:'1.2-2' }}</span>
+          </button>
+
+          <button 
+            class="btn-cuota" 
+            [class.activa]="esSeleccionada(evento.id, 'EMPATE')"
+            (click)="seleccionar(evento, 'EMPATE')">
+            <span class="label">X</span>
+            <span class="valor">{{ evento.cuotas.empate | number:'1.2-2' }}</span>
+          </button>
+
+          <button 
+            class="btn-cuota" 
+            [class.activa]="esSeleccionada(evento.id, 'VISITANTE')"
+            (click)="seleccionar(evento, 'VISITANTE')">
+            <span class="label">2</span>
+            <span class="valor">{{ evento.cuotas.visitante | number:'1.2-2' }}</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</section>

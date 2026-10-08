@@ -1,0 +1,36 @@
+<div class="historial-container">
+  <div class="historial-header">
+    <h3>📜 Mis Apuestas Recientes</h3>
+  </div>
+
+  @if (tickets().length === 0) {
+    <div class="vacio-historial">
+      <p>Aún no has colocado apuestas en esta sesión.</p>
+    </div>
+  } @else {
+    <div class="tickets-list">
+      @for (ticket of tickets(); track ticket.id) {
+        <div class="ticket-card" [class]="ticket.estado.toLowerCase()">
+          <div class="ticket-info">
+            <span class="partido">{{ ticket.eventoResumen.partido }}</span>
+            <span class="liga">{{ ticket.eventoResumen.liga }}</span>
+          </div>
+
+          <div class="ticket-detalles">
+            <span class="seleccion">Mercado: <strong>{{ ticket.seleccion }}</strong> (@{{ ticket.cuotaJugada | number:'1.2-2' }})</span>
+            <span class="monto">Apostado: ${{ ticket.montoApostado | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="ticket-status-row">
+            <span class="badge-status" [class]="ticket.estado.toLowerCase()">
+              {{ ticket.estado }}
+            </span>
+            <span class="ganancia-potencial">
+              Retorno: ${{ ticket.gananciaPotencial | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,62 @@
+<aside class="betslip-card">
+  <div class="betslip-header">
+    <div class="title">
+      <span class="icon">🎟️</span>
+      <h3>Cupón de Apuestas</h3>
+    </div>
+    @if (seleccion()) {
+      <button class="btn-clear" (click)="limpiar()" title="Eliminar selección">✕</button>
+    }
+  </div>
+
+  <div class="betslip-body">
+    @if (seleccion(); as sel) {
+      <div class="seleccion-item">
+        <div class="partido-info">
+          <span class="equipos">{{ sel.evento.equipoLocal }} vs {{ sel.evento.equipoVisitante }}</span>
+          <span class="liga">{{ sel.evento.liga }}</span>
+        </div>
+
+        <div class="apuesta-tipo">
+          <span class="opcion">Mercado: <strong>{{ sel.opcion }}</strong></span>
+          <span class="cuota-badge">{{ sel.cuota | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="monto-field">
+          <label for="montoInput">Monto ($ USD):</label>
+          <input 
+            id="montoInput"
+            type="number" 
+            min="1" 
+            [value]="montoApostado()" 
+            (input)="onMontoChange($event)"
+            placeholder="Monto" />
+        </div>
+
+        <div class="resumen-ganancias">
+          <span>Ganancia Potencial:</span>
+          <span class="total-ganancia">${{ gananciaPotencial() | number:'1.2-2' }}</span>
+        </div>
+
+        @if (mensajeAlerta) {
+          <div class="alerta" [class.exito]="tipoAlerta === 'exito'" [class.error]="tipoAlerta === 'error'">
+            {{ mensajeAlerta }}
+          </div>
+        }
+
+        <button 
+          class="btn-apostar" 
+          [disabled]="montoApostado() <= 0 || montoApostado() > saldoUsuario()"
+          (click)="apostar()">
+          Apostar ${{ montoApostado() | number:'1.2-2' }}
+        </button>
+      </div>
+    } @else {
+      <div class="vacio-state">
+        <span class="vacio-icon">👈</span>
+        <p>Tu cupón está vacío.</p>
+        <small>Haz clic en cualquier cuota de la cartelera para comenzar.</small>
+      </div>
+    }
+  </div>
+</aside>

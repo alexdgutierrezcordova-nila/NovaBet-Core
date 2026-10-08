@@ -1,0 +1,16 @@
+<header class="app-header">
+  <div class="logo-container">
+    <span class="logo-accent">⚡</span>
+    <span class="logo-text">BET<span class="highlight">PULSE</span></span>
+  </div>
+
+  <div class="user-panel">
+    <div class="balance-badge">
+      <span class="balance-label">Saldo:</span>
+      <span class="balance-amount">${{ saldo() | number:'1.2-2' }}</span>
+    </div>
+    <button class="btn-recargar" (click)="recargar()" title="Recargar $500 ficticios">
+      + Recargar
+    </button>
+  </div>
+</header>
