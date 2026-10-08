@@ -25,6 +25,6 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`🚀 [BetPulse API]: Servidor corriendo en http://localhost:${port}/api`);
+  console.log(`🚀 [NovaBet API]: Servidor corriendo en http://localhost:${port}/api`);
 }
 await bootstrap();

@@ -13,7 +13,7 @@ Eres el dueño de la **billetera, el dinero del jugador y la auditoría de apues
 1. **En Base de Datos (Mongoose):** Diseñar el modelo `usuario` con un balance inicial ficticio (\$1,000.00 USD para `'usr-demo'`).
 2. **En Backend (NestJS):** Crear endpoints para consultar el saldo disponible, recargar saldo ficticio (`+ $500`), proveer funciones de débito/crédito que consumirá el Módulo 2 y servir el historial de boletos.
 3. **En Frontend (Angular):**
-   * Crear el **Header superior:** Muestra el logo **BetPulse**, el saldo actual en vivo formateado con decimales y el botón "+ Recargar". Escucha las confirmaciones de apuestas del Módulo 2 para refrescar el saldo automáticamente.
+   * Crear el **Header superior:** Muestra el logo **NovaBet**, el saldo actual en vivo formateado con decimales y el botón "+ Recargar". Escucha las confirmaciones de apuestas del Módulo 2 para refrescar el saldo automáticamente.
    * Crear el componente **Historial:** Muestra la lista de apuestas realizadas consumiendo `GET /api/apuestas/historial` con badges visuales de color según su estado:
      * 🟡 `PENDIENTE` (usando `var(--color-pendiente)`)
      * 🟢 `GANADA` (usando `var(--color-ganada)`)
@@ -78,7 +78,7 @@ export class Usuario {
   @Prop({ required: true, default: 'Apostador Demo' })
   nombre: string;
 
-  @Prop({ required: true, default: 'demo@betpulse.com' })
+  @Prop({ required: true, default: 'demo@novabet.com' })
   email: string;
 
   @Prop({ required: true, default: 1000.00, min: 0 })
@@ -119,7 +119,7 @@ export class UsuarioService implements OnModuleInit {
       await this.usuarioModel.create({
         usuarioId: 'usr-demo',
         nombre: 'Apostador Demo',
-        email: 'demo@betpulse.com',
+        email: 'demo@novabet.com',
         saldo: 1000.00
       });
       console.log('✅ [Seed]: Usuario demo inicial creado con $1,000.');

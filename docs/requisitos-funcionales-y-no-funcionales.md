@@ -1,4 +1,4 @@
-# 📋 Especificación de Requisitos del Sistema — BetPulse
+# 📋 Especificación de Requisitos del Sistema — NovaBet
 
 ## 1. Tabla de Requisitos Funcionales (RF)
 

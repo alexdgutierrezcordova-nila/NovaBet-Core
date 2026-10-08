@@ -1,4 +1,4 @@
-# 📑 Contrato Global e Integración Técnica — MVP BetPulse
+# 📑 Contrato Global e Integración Técnica — MVP NovaBet
 
 > **Enfoque de Trabajo:** **Módulos Verticales de Negocio (Full-Stack por Feature)**  
 > **Stack Oficial:**

@@ -5,7 +5,7 @@ import { AppService } from './app.service.js';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/betpulse'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/novabet'),
     // Aquí cada integrante registrará su módulo al programarlo:
     // EventosModule,
     // ApuestasModule,

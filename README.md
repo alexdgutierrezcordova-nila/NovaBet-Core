@@ -1,4 +1,4 @@
-# ⚡ BetPulse — Plataforma de Apuestas Deportivas Web (MVP)
+# ⚡ NovaBet — Plataforma de Apuestas Deportivas Web (MVP)
 
 > **Slogan:** *"Siente el pulso del deporte en cada jugada"*  
 > **Tecnologías:** Angular 22.0.5 (SSR, Signals) | NestJS 11.1.9 | MongoDB (Mongoose 8.20.2)
