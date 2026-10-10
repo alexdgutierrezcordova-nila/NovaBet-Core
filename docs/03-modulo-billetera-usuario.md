@@ -1,225 +1,278 @@
-# 📗 Guía de Implementación: Módulo 3 — Billetera Virtual & Historial de Usuario
+# 📗 Guía de Implementación: Módulo 3 — Billetera Virtual, Libro Mayor (Ledger) e Historial
 
 > **Responsable:** Integrante 3  
 > **Rama Git:** `feature/modulo-billetera-usuario`  
-> **Issue en GitHub:** `Issue #3: [Módulo 3] Gestión de saldo virtual, recargas y panel de historial de apuestas`  
-> **Enfoque:** Full-Stack del Feature (Base de datos MongoDB + API NestJS + Header con Saldo & Historial Angular)
+> **Issue en GitHub:** `Issue #3: [Módulo 3] Gestión de saldo virtual en centavos, libro mayor transaccional e historial`  
+> **Enfoque:** Full-Stack del Feature (Billetera y Ledger en MongoDB + API NestJS con soporte para Transacciones + Header e Historial en Angular)
 
 ---
 
-## 1. Misión de tu Módulo
+## 1. Misión de tu Módulo en la Arquitectura v2
 
-Eres el dueño de la **billetera, el dinero del jugador y la auditoría de apuestas**. Tu trabajo consiste en:
-1. **En Base de Datos (Mongoose):** Diseñar el modelo `usuario` con un balance inicial ficticio (\$1,000.00 USD para `'usr-demo'`).
-2. **En Backend (NestJS):** Crear endpoints para consultar el saldo disponible, recargar saldo ficticio (`+ $500`), proveer funciones de débito/crédito que consumirá el Módulo 2 y servir el historial de boletos.
+Eres el banquero y auditor de **todo el flujo financiero y contable de NovaBet**. En esta arquitectura profesional v2, tu responsabilidad es garantizar que ningún centavo desaparezca sin dejar rastro de auditoría:
+1. **En Base de Datos (Mongoose):**
+   - Diseñar la colección `billeteras` para el saldo disponible del usuario en **centavos enteros** (ej. 100,000 centavos = \$1,000.00 USD).
+   - Diseñar la colección inmutable `transacciones` (**Libro Mayor o Ledger**): cada recarga, cobro de apuesta, premio o devolución queda registrado como un movimiento contable con referencia única.
+2. **En Backend (NestJS):**
+   - Implementar `BilleteraService` con soporte para recibir una `session?: ClientSession` de MongoDB. Esto permite que Carlos (Módulo 2) ejecute débitos dentro de su transacción ACID sin riesgo de desincronización.
+   - Proveer métodos seguros de débito, crédito, reembolso y *clawback* (reversión por VAR).
 3. **En Frontend (Angular):**
-   * Crear el **Header superior:** Muestra el logo **NovaBet**, el saldo actual en vivo formateado con decimales y el botón "+ Recargar". Escucha las confirmaciones de apuestas del Módulo 2 para refrescar el saldo automáticamente.
-   * Crear el componente **Historial:** Muestra la lista de apuestas realizadas consumiendo `GET /api/apuestas/historial` con badges visuales de color según su estado:
-     * 🟡 `PENDIENTE` (usando `var(--color-pendiente)`)
-     * 🟢 `GANADA` (usando `var(--color-ganada)`)
-     * 🔴 `PERDIDA` (usando `var(--color-perdida)`)
+   - **Header superior:** Muestra el logo **NovaBet**, el saldo formateado (`saldoCentavos / 100`), botón de recarga rápida y escucha a `BetslipService.apuestaConfirmada$` para actualizar el saldo sin recargar la página.
+   - **Historial de Apuestas:** Lista los tickets consumiendo `GET /api/apuestas/historial` mostrando fecha nativa (`createdAt`), montos en dólares y badges de estado (`PENDIENTE`, `GANADA`, `PERDIDA`, `ANULADA`).
 
 ---
 
 ## 2. Requisitos Funcionales a Cumplir
 
-* **RF3.1 (Monedero Virtual en MongoDB):** Almacenar un usuario ficticio (`usuarioId: 'usr-demo'`) con nombre, email y saldo decimal (mínimo 0). Crear un seeder en `onModuleInit()` que inserte este usuario con \$1,000.00 si no existe.
-* **RF3.2 (API de Billetera):**
-  * `GET /api/usuario/perfil` retorna los datos del usuario y su saldo.
-  * `POST /api/usuario/recargar` permite sumar fondos al saldo.
-* **RF3.3 (Header con Balance Reactivo):** Barra superior fija que consulta el saldo inicial al cargar la página y vuelve a consultarlo cada vez que se recarga dinero o el Betslip confirma una apuesta.
-* **RF3.4 (Historial de Tickets):** Renderizar las apuestas recientes ordenadas por fecha descendente, indicando el partido, la opción jugada, el monto, la ganancia potencial y el estado actual.
+* **RF3.1 (Persistencia de Billetera y Ledger en Centavos):** Almacenar la billetera del usuario demo (`usuarioId: 'usr-demo'`) con saldo inicial de 100,000 centavos (\$1,000.00 USD). Seeder en `onModuleInit()` que crea usuario y billetera inicial si no existen.
+* **RF3.2 (API Contable y de Billetera):**
+  * `GET /api/billetera/balance` retorna el saldo y estado de bloqueo.
+  * `POST /api/billetera/recargar` añade centavos al saldo y registra la transacción en el ledger.
+* **RF3.3 (Integración Transaccional con Carlos):** Exportar `debitarSaldo(usuarioId, montoCentavos, referenciaIdempotente, session)` para ser consumido dentro de `session.withTransaction()` de Apuestas.
+* **RF3.4 (Header y Formateo en Angular):** Transformar centavos a dólares con 2 decimales para la UI.
+* **RF3.5 (Historial Auditado):** Visualizar tickets ordenados por fecha descendente con estados visuales claros.
 
 ---
 
 ## 3. Archivos que vas a crear en tu rama
 
-### En el Backend (`apuestas-api/src/usuario/`):
+### En el Backend (`apuestas-api/src/billetera/`):
 ```text
-apuestas-api/src/usuario/
-├── schemas/usuario.schema.ts     ← Esquema Mongoose del usuario y saldo
-├── dto/recargar-saldo.dto.ts     ← DTO con validación @IsPositive()
-├── usuario.service.ts            ← Lógica de balance, recarga, débito y crédito
-├── usuario.controller.ts         ← Endpoints GET /perfil y POST /recargar
-└── usuario.module.ts             ← Módulo exportando UsuarioService para Módulo 2
+apuestas-api/src/billetera/
+├── schemas/
+│   ├── billetera.schema.ts          ← Balance actual en centavos y flag bloqueada
+│   └── transaccion.schema.ts        ← Libro Mayor inmutable (append-only)
+├── dto/recargar-saldo.dto.ts        ← Validación @IsInt, @IsPositive
+├── billetera.service.ts             ← Lógica de débito, crédito, recarga y ledger
+├── billetera.controller.ts          ← Endpoints GET /balance y POST /recargar
+└── billetera.module.ts              ← Exporta BilleteraService para Carlos (M2)
 ```
 
 ### En el Frontend (`apuestas-web/src/app/`):
 ```text
 apuestas-web/src/app/
-├── domains/usuario/
-│   └── usuario.service.ts        ← Servicio HTTP para consultar y recargar saldo
+├── domains/billetera/
+│   ├── billetera.model.ts           ← Interfaces Billetera y TransaccionLedger
+│   └── billetera.service.ts         ← Cliente HTTP para balance y recargas
 ├── shared/ui/header/
-│   ├── header.ts                 ← Componente de cabecera que escucha eventos
-│   ├── header.html               ← Template con logo y badge de saldo
-│   └── header.scss               ← Estilos del header
+│   ├── header.ts                    ← Cabecera reactiva suscrita a apuestaConfirmada$
+│   ├── header.html                  ← Barra superior con logo, saldo y botón recargar
+│   └── header.scss                  ← Estilos usando var(--bg-header), var(--accent-green)
 └── features/historial/
-    ├── historial.ts              ← Componente de historial que lista tickets
-    ├── historial.html            ← Template con lista de tickets y badges
-    └── historial.scss            ← Estilos usando var(--color-pendiente), etc.
+    ├── historial.ts                 ← Lista de tickets de apuestas
+    ├── historial.html               ← Tabla o tarjetas con badges de color
+    └── historial.scss               ← Estilos usando var(--color-pendiente), etc.
 ```
 
 ---
 
-## 4. Implementación Técnica y Modelos
+## 4. Esquemas Mongoose Oficiales
 
-### 4.1. Esquema Mongoose (`apuestas-api/src/usuario/schemas/usuario.schema.ts`)
+### 4.1. Esquema Billetera (`schemas/billetera.schema.ts`)
 ```typescript
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type UsuarioDocument = Usuario & Document;
+export type BilleteraDocument = Billetera & Document;
 
 @Schema({ timestamps: true })
-export class Usuario {
-  @Prop({ required: true, default: 'usr-demo' })
+export class Billetera {
+  @Prop({ required: true, unique: true, default: 'usr-demo' })
   usuarioId: string;
 
-  @Prop({ required: true, default: 'Apostador Demo' })
-  nombre: string;
+  @Prop({ required: true, default: 100000, min: 0 }) // 100,000 centavos = $1,000 USD
+  saldoCentavos: number;
 
-  @Prop({ required: true, default: 'demo@novabet.com' })
-  email: string;
-
-  @Prop({ required: true, default: 1000.00, min: 0 })
-  saldo: number;
+  @Prop({ required: true, default: false })
+  bloqueada: boolean; // Se bloquea si queda en negativo por un clawback de VAR
 }
 
-export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
+export const BilleteraSchema = SchemaFactory.createForClass(Billetera);
 ```
 
-### 4.2. DTO de Recarga (`apuestas-api/src/usuario/dto/recargar-saldo.dto.ts`)
+### 4.2. Esquema Libro Mayor / Ledger (`schemas/transaccion.schema.ts`)
 ```typescript
-import { IsNumber, IsPositive } from 'class-validator';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-export class RecargarSaldoDto {
-  @IsNumber()
-  @IsPositive({ message: 'El monto de recarga debe ser mayor a 0' })
-  monto: number;
+export type TransaccionDocument = Transaccion & Document;
+
+@Schema({ timestamps: { createdAt: true, updatedAt: false } }) // Append-only inmutable
+export class Transaccion {
+  @Prop({ required: true })
+  usuarioId: string;
+
+  @Prop({ 
+    required: true, 
+    enum: ['RECARGA', 'APUESTA', 'PREMIO', 'REEMBOLSO', 'CLAWBACK'] 
+  })
+  tipo: string;
+
+  @Prop({ required: true })
+  montoCentavos: number; // Positivo para recarga/premio/reembolso, negativo para apuesta/clawback
+
+  @Prop({ required: false })
+  ticketId?: string;
+
+  @Prop({ required: true, unique: true })
+  referenciaIdempotente: string; // Garantiza que una operación no se audite dos veces
 }
+
+export const TransaccionSchema = SchemaFactory.createForClass(Transaccion);
+TransaccionSchema.index({ usuarioId: 1, createdAt: -1 });
 ```
-
-### 4.3. Servicio de Usuario en NestJS (`apuestas-api/src/usuario/usuario.service.ts`)
-Debes exportar métodos para que el Integrante 2 pueda debitar y acreditar saldo:
-```typescript
-import { Injectable, OnModuleInit, BadRequestException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Usuario, UsuarioDocument } from './schemas/usuario.schema.js';
-
-@Injectable()
-export class UsuarioService implements OnModuleInit {
-  constructor(
-    @InjectModel(Usuario.name) private readonly usuarioModel: Model<UsuarioDocument>
-  ) {}
-
-  async onModuleInit() {
-    const demo = await this.usuarioModel.findOne({ usuarioId: 'usr-demo' });
-    if (!demo) {
-      await this.usuarioModel.create({
-        usuarioId: 'usr-demo',
-        nombre: 'Apostador Demo',
-        email: 'demo@novabet.com',
-        saldo: 1000.00
-      });
-      console.log('✅ [Seed]: Usuario demo inicial creado con $1,000.');
-    }
-  }
-
-  async obtenerPerfil(usuarioId = 'usr-demo') {
-    return this.usuarioModel.findOne({ usuarioId }).exec();
-  }
-
-  async recargarSaldo(usuarioId = 'usr-demo', monto: number) {
-    return this.usuarioModel.findOneAndUpdate(
-      { usuarioId },
-      { $inc: { saldo: monto } },
-      { new: true }
-    ).exec();
-  }
-
-  async debitarSaldo(usuarioId = 'usr-demo', monto: number) {
-    const user = await this.obtenerPerfil(usuarioId);
-    if (!user || user.saldo < monto) {
-      throw new BadRequestException('Saldo insuficiente para realizar la apuesta');
-    }
-    return this.usuarioModel.findOneAndUpdate(
-      { usuarioId, saldo: { $gte: monto } },
-      { $inc: { saldo: -monto } },
-      { new: true }
-    ).exec();
-  }
-
-  async acreditarSaldo(usuarioId = 'usr-demo', monto: number) {
-    return this.usuarioModel.findOneAndUpdate(
-      { usuarioId },
-      { $inc: { saldo: monto } },
-      { new: true }
-    ).exec();
-  }
-}
-```
-
-> **IMPORTANTE:** En `usuario.module.ts`, debes colocar `exports: [UsuarioService]` para que el `ApuestasModule` del Integrante 2 pueda inyectarlo.
 
 ---
 
-## 5. Integración en el Frontend (Refresco de Saldo e Historial)
+## 5. Servicio de Billetera Transaccional (`billetera.service.ts`)
 
-### Cómo sincronizar el Header con el Betslip del Módulo 2:
-En tu componente `header.ts`:
+> **ATENCIÓN:** El parámetro `session?: ClientSession` es la clave para que Carlos pueda llamarte dentro de su transacción ACID sin romper la atomicidad.
+
 ```typescript
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { UsuarioService } from '../../../domains/usuario/usuario.service';
+import { Injectable, BadRequestException, OnModuleInit } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, ClientSession } from 'mongoose';
+import { Billetera, BilleteraDocument } from './schemas/billetera.schema';
+import { Transaccion, TransaccionDocument } from './schemas/transaccion.schema';
+
+@Injectable()
+export class BilleteraService implements OnModuleInit {
+  constructor(
+    @InjectModel(Billetera.name) private readonly billeteraModel: Model<BilleteraDocument>,
+    @InjectModel(Transaccion.name) private readonly transaccionModel: Model<TransaccionDocument>
+  ) {}
+
+  async onModuleInit() {
+    const demo = await this.billeteraModel.findOne({ usuarioId: 'usr-demo' });
+    if (!demo) {
+      await this.billeteraModel.create({
+        usuarioId: 'usr-demo',
+        saldoCentavos: 100000, // $1,000.00 USD inicial
+        bloqueada: false
+      });
+      console.log('✅ [Seed]: Billetera inicial creada con $1,000.00 USD (100,000 centavos).');
+    }
+  }
+
+  async obtenerBalance(usuarioId = 'usr-demo') {
+    return this.billeteraModel.findOne({ usuarioId }).exec();
+  }
+
+  // Débito transaccional llamado por el Módulo 2 de Carlos
+  async debitarSaldo(
+    usuarioId: string, 
+    montoCentavos: number, 
+    referenciaIdempotente: string, 
+    session?: ClientSession
+  ) {
+    // 1. Descontar saldo de forma atómica condicionada
+    const res = await this.billeteraModel.findOneAndUpdate(
+      { 
+        usuarioId, 
+        bloqueada: false, 
+        saldoCentavos: { $gte: montoCentavos } 
+      },
+      { $inc: { saldoCentavos: -montoCentavos } },
+      { new: true, session }
+    );
+
+    if (!res) {
+      throw new BadRequestException('Saldo insuficiente o billetera bloqueada');
+    }
+
+    // 2. Registrar en el Ledger dentro de la MISMA sesión
+    await this.transaccionModel.create([{
+      usuarioId,
+      tipo: 'APUESTA',
+      montoCentavos: -montoCentavos,
+      referenciaIdempotente
+    }], { session });
+
+    return res;
+  }
+
+  // Recarga simple de saldo
+  async recargarSaldo(usuarioId = 'usr-demo', montoCentavos = 50000) { // $500 USD por defecto
+    const ref = `recarga-${Date.now()}-${crypto.randomUUID()}`;
+    const billetera = await this.billeteraModel.findOneAndUpdate(
+      { usuarioId },
+      { $inc: { saldoCentavos: montoCentavos } },
+      { new: true }
+    );
+
+    await this.transaccionModel.create({
+      usuarioId,
+      tipo: 'RECARGA',
+      montoCentavos,
+      referenciaIdempotente: ref
+    });
+
+    return billetera;
+  }
+}
+```
+
+> **IMPORTANTE:** En `billetera.module.ts`, no olvides colocar `exports: [BilleteraService]`.
+
+---
+
+## 6. Integración en el Frontend (Header e Historial en Angular)
+
+### 6.1. Header Reactivo (`header.ts`)
+```typescript
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { BilleteraService } from '../../../domains/billetera/billetera.service';
 import { BetslipService } from '../../../domains/apuestas/betslip.service';
 
+@Component({
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './header.html',
+  styleUrl: './header.scss'
+})
 export class Header implements OnInit {
-  private readonly usuarioService = inject(UsuarioService);
+  private readonly billeteraService = inject(BilleteraService);
   private readonly betslipService = inject(BetslipService);
 
-  readonly saldo = signal<number>(1000);
+  readonly saldoCentavos = signal<number>(100000);
+
+  // Formato para mostrar al usuario en dólares
+  readonly saldoFormateado = computed(() => {
+    return (this.saldoCentavos() / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    });
+  });
 
   ngOnInit() {
-    this.cargarSaldo();
+    this.cargarBalance();
 
-    // Cuando el Integrante 2 confirma una apuesta, refrescamos el saldo automáticamente
+    // Cuando Carlos confirma una apuesta en el Betslip, refrescamos automáticamente
     this.betslipService.apuestaConfirmada$.subscribe(() => {
-      this.cargarSaldo();
+      this.cargarBalance();
     });
   }
 
-  cargarSaldo() {
-    this.usuarioService.obtenerPerfil().subscribe(usuario => {
-      this.saldo.set(usuario.saldo);
+  cargarBalance() {
+    this.billeteraService.obtenerBalance().subscribe(b => {
+      this.saldoCentavos.set(b.saldoCentavos);
     });
   }
 
   recargar() {
-    this.usuarioService.recargarSaldo(500).subscribe(usuario => {
-      this.saldo.set(usuario.saldo);
+    // Recargar $500 USD (50,000 centavos)
+    this.billeteraService.recargarSaldo(50000).subscribe(b => {
+      this.saldoCentavos.set(b.saldoCentavos);
     });
   }
 }
 ```
 
----
-
-## 6. Flujo de Trabajo en Git
-
-1. Crear tu rama:
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feature/modulo-billetera-usuario
-   ```
-2. Realizar commits descriptivos referenciando el Issue #3:
-   ```bash
-   git commit -m "feat(usuario): esquema mongoose de usuario y seeder de $1000 (#3)"
-   git commit -m "feat(usuario): endpoints GET /perfil y POST /recargar (#3)"
-   git commit -m "feat(header): componente con saldo reactivo y boton de recarga (#3)"
-   git commit -m "feat(historial): visualizacion de tickets apostados y estados (#3)"
-   ```
-3. Subir rama y abrir Pull Request:
-   ```bash
-   git push origin feature/modulo-billetera-usuario
-   ```
+### 6.2. Historial de Tickets (`historial.ts`)
+En el historial, renderizas los tickets consumiendo `GET /api/apuestas/historial` usando `ticket.createdAt` y formateando los montos dividiendo entre 100:
+* 🟡 `PENDIENTE` (`var(--color-pendiente)`)
+* 🟢 `GANADA` (`var(--color-ganada)`)
+* 🔴 `PERDIDA` (`var(--color-perdida)`)
+* ⚪ `ANULADA` (`var(--text-muted)`)
