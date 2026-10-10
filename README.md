@@ -47,18 +47,22 @@ Cada integrante debe consultar su guía detallada en [`docs/`](./docs/) antes de
 
 ---
 
-## 🚀 Cómo Iniciar el Proyecto en Local
+## 🚀 Cómo Iniciar el Proyecto en Local (Con `pnpm`)
+
+> **Requisitos del Entorno:** Node.js `v24.18.0` | Gestor de paquetes: `pnpm`
 
 ### 1. Backend (`apuestas-api`)
 ```bash
 cd apuestas-api
-npm run start:dev
+pnpm install
+pnpm run start:dev
 ```
 > Servidor disponible en: `http://localhost:3000/api`
 
 ### 2. Frontend (`apuestas-web`)
 ```bash
 cd apuestas-web
-npm run start
+pnpm install
+pnpm run start
 ```
 > Aplicación web disponible en: `http://localhost:4200`
