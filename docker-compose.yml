@@ -1,0 +1,77 @@
+services:
+  # ──────────────────────────────────────────────────────────────────────────
+  # MongoDB en modo Replica Set de un nodo (rs0)
+  # Requisito obligatorio para Transacciones ACID (session.withTransaction())
+  # y Change Streams. Ver ADR-001 y RNF06.
+  # ──────────────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:8.0
+    container_name: novabet-mongo
+    restart: unless-stopped
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - novabet_mongo_data:/data/db
+      # Script que inicializa el Replica Set la primera vez que arranca
+      - ./scripts/mongo-rs-init.js:/docker-entrypoint-initdb.d/mongo-rs-init.js:ro
+    networks:
+      - novabet-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "db.adminCommand('ping').ok",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Seed — inserta datos de prueba en MongoDB (solo se ejecuta una vez)
+  # Incluye: Billetera demo, Evento y Mercado de prueba para el Módulo 2.
+  # Los integrantes 1 y 3 sobreescribirán/extenderán estos datos con sus seeds.
+  # ──────────────────────────────────────────────────────────────────────────
+  seed:
+    image: mongo:8.0
+    container_name: novabet-seed
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./scripts/seed.js:/seed.js:ro
+    command: ["mongosh", "mongodb://mongodb:27017/novabet", "/seed.js"]
+    networks:
+      - novabet-network
+    restart: "no"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Backend NestJS
+  # ──────────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./apuestas-api
+      dockerfile: Dockerfile
+    container_name: novabet-api
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/novabet?replicaSet=rs0
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    networks:
+      - novabet-network
+
+volumes:
+  novabet_mongo_data:
+
+networks:
+  novabet-network:
+    driver: bridge
