@@ -1,10 +1,10 @@
-import { OpcionSeleccionada } from '../eventos/evento.model';
+import { OpcionSeleccionada } from '../cuotas/mercado.model';
 
 export type EstadoTicket = 'PENDIENTE' | 'GANADA' | 'PERDIDA' | 'ANULADA';
 
 export interface TicketApuesta {
-  _id: string;                    // MongoDB ObjectId serializado como string
-  usuarioId: string;              // Siempre 'usr-demo' para este MVP
+  _id: string;
+  usuarioId: string;              // 'usr-demo'
   eventoId: string;
   eventoResumen: {
     partido: string;
@@ -12,9 +12,11 @@ export interface TicketApuesta {
   };
   seleccion: OpcionSeleccionada;
   cuotaJugada: number;
-  montoApostado: number;
-  gananciaPotencial: number;
+  cuotasVersion: number;          // Versión congelada en el momento de la apuesta
+  montoCentavos: number;          // Ej: 1000 = $10.00 USD
+  gananciaPotencialCentavos: number; // Ej: 1850 = $18.50 USD
   estado: EstadoTicket;
-  creadoEn: string;
+  idempotencyKey: string;         // Clave anti-duplicados del frontend
+  createdAt: string;              // ISO 8601 nativo
   resueltoEn?: string;
 }
