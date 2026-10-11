@@ -1,1 +1,108 @@
-<p>cartelera works!</p>
+<section class="cartelera-container">
+  <div class="cartelera-header">
+    <div class="header-title">
+      <h2>⚽ Partidos Destacados</h2>
+      <span class="badge-total">{{ eventos().length }} eventos disponibles</span>
+    </div>
+    <button class="btn-refrescar" (click)="cargarEventos()" [disabled]="cargando()">
+      🔄 Refrescar
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="estado-cargando">
+      <div class="spinner"></div>
+      <p>Cargando cartelera de partidos...</p>
+    </div>
+  } @else if (error()) {
+    <div class="alerta-error">
+      <span class="icono">⚠️</span>
+      <p>{{ error() }}</p>
+      <button class="btn-reintentar" (click)="cargarEventos()">Reintentar</button>
+    </div>
+  } @else if (eventos().length === 0) {
+    <div class="estado-vacio">
+      <p>No hay eventos disponibles en este momento.</p>
+    </div>
+  } @else {
+    <div class="grid-partidos">
+      @for (ev of eventos(); track ev._id) {
+        <article class="tarjeta-partido" [class.partido-live]="ev.estado === 'LIVE'">
+          <div class="tarjeta-top">
+            <span class="liga">{{ ev.liga }}</span>
+            <span class="badge-estado" [class.live]="ev.estado === 'LIVE'">
+              {{ ev.estado }}
+            </span>
+          </div>
+
+          <div class="equipos-row">
+            <div class="equipo equipo-local">
+              <span class="nombre">{{ ev.equipoLocal }}</span>
+              <span class="goles">{{ ev.marcador.local }}</span>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="equipo equipo-visitante">
+              <span class="goles">{{ ev.marcador.visitante }}</span>
+              <span class="nombre">{{ ev.equipoVisitante }}</span>
+            </div>
+          </div>
+
+          <div class="fecha-info">
+            <span class="icono-reloj">🕒</span>
+            <span>{{ ev.fechaProgramada | date: 'medium' }}</span>
+          </div>
+
+          @if (ev.mercado; as m) {
+            <div class="mercado-cuotas">
+              <div class="cuotas-header">
+                <span class="tipo-mercado">Ganador del Partido (1X2)</span>
+                @if (m.estadoMercado === 'SUSPENDIDO') {
+                  <span class="badge-suspendido">⏸️ Mercado suspendido</span>
+                }
+              </div>
+
+              <div class="cuotas-botones">
+                <button
+                  type="button"
+                  class="btn-cuota"
+                  [class.seleccionada]="esSeleccionada(ev._id, 'LOCAL')"
+                  [disabled]="m.estadoMercado !== 'ABIERTO'"
+                  (click)="seleccionarCuota(ev, m, 'LOCAL')"
+                >
+                  <span class="etiqueta">1</span>
+                  <span class="valor">{{ m.cuotas.local | number: '1.2-2' }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-cuota"
+                  [class.seleccionada]="esSeleccionada(ev._id, 'EMPATE')"
+                  [disabled]="m.estadoMercado !== 'ABIERTO'"
+                  (click)="seleccionarCuota(ev, m, 'EMPATE')"
+                >
+                  <span class="etiqueta">X</span>
+                  <span class="valor">{{ m.cuotas.empate | number: '1.2-2' }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-cuota"
+                  [class.seleccionada]="esSeleccionada(ev._id, 'VISITANTE')"
+                  [disabled]="m.estadoMercado !== 'ABIERTO'"
+                  (click)="seleccionarCuota(ev, m, 'VISITANTE')"
+                >
+                  <span class="etiqueta">2</span>
+                  <span class="valor">{{ m.cuotas.visitante | number: '1.2-2' }}</span>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="sin-mercado">
+              <p>Cuotas no disponibles para este partido.</p>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>
