@@ -1,6 +1,8 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  OnInit,
+  OnDestroy,
   computed,
   inject,
   signal,
@@ -10,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs';
 import { BetslipService } from '../../domains/apuestas/betslip.service';
+import { CuotasStreamService } from '../../domains/cuotas/cuotas-stream.service';
 import { TicketApuesta } from '../../domains/apuestas/apuesta.model';
 import { Evento } from '../../domains/eventos/evento.model';
 import {
@@ -25,8 +28,9 @@ import {
   styleUrls: ['./betslip.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Betslip {
+export class Betslip implements OnInit, OnDestroy {
   readonly betslipService = inject(BetslipService);
+  private readonly cuotasStream = inject(CuotasStreamService);
 
   readonly seleccion = this.betslipService.seleccion;
   readonly montoUSD = this.betslipService.montoUSD;
@@ -42,6 +46,17 @@ export class Betslip {
   readonly ticketReciente = signal<TicketApuesta | null>(null);
 
   readonly montosRapidos = [5, 10, 25, 50, 100];
+
+  ngOnInit(): void {
+    // Inicia la conexión EventSource al stream SSE de cuotas (Módulo 1 / ADR-003)
+    // Es SSR-safe: CuotasStreamService verifica isPlatformBrowser internamente.
+    this.cuotasStream.conectar();
+  }
+
+  ngOnDestroy(): void {
+    // Cerramos la conexión SSE cuando el componente se destruye para evitar memory leaks
+    this.cuotasStream.desconectar();
+  }
 
   readonly botonDeshabilitado = computed(() => {
     const sel = this.seleccion();
