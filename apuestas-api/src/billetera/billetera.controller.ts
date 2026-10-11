@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { BilleteraService } from './billetera.service.js';
 import { Billetera } from './schemas/billetera.schema.js';
+import { RecargarSaldoDto } from './dto/recargar-saldo.dto.js';
 
 /**
  * @class BilleteraController
@@ -33,5 +34,33 @@ export class BilleteraController {
     @Query('usuarioId') usuarioId = 'usr-demo'
   ): Promise<Billetera> {
     return this.billeteraService.obtenerBalance(usuarioId);
+  }
+
+  /**
+   * Endpoint POST /api/billetera/recargar
+   * Permite añadir fondos virtuales a la billetera en centavos enteros
+   * y asienta la operación en el Libro Mayor (Ledger).
+   * 
+   * @param dto Datos validados de la recarga (montoCentavos > 0, usuarioId opcional)
+   * @returns Documento de la billetera con el saldo actualizado
+   * 
+   * @example
+   * POST /api/billetera/recargar
+   * Body: { "montoCentavos": 50000 } // $500.00 USD
+   * Response 200 OK:
+   * {
+   *   "_id": "...",
+   *   "usuarioId": "usr-demo",
+   *   "saldoCentavos": 150000,
+   *   "bloqueada": false
+   * }
+   */
+  @Post('recargar')
+  @HttpCode(HttpStatus.OK)
+  async recargarSaldo(
+    @Body() dto: RecargarSaldoDto
+  ): Promise<Billetera> {
+    const usuarioId = dto.usuarioId ?? 'usr-demo';
+    return this.billeteraService.recargarSaldo(usuarioId, dto.montoCentavos);
   }
 }
