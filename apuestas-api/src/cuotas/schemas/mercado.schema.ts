@@ -5,13 +5,13 @@ export type MercadoDocument = Mercado & Document;
 
 @Schema({ _id: false })
 export class Cuotas1X2Schema {
-  @Prop({ required: true, min: 1.01 })
+  @Prop({ type: Number, required: true, min: 1.01 })
   local: number;
 
-  @Prop({ required: true, min: 1.01 })
+  @Prop({ type: Number, required: true, min: 1.01 })
   empate: number;
 
-  @Prop({ required: true, min: 1.01 })
+  @Prop({ type: Number, required: true, min: 1.01 })
   visitante: number;
 }
 
@@ -20,10 +20,11 @@ export class Mercado {
   @Prop({ type: Types.ObjectId, ref: 'Evento', required: true, unique: true })
   eventoId: Types.ObjectId;
 
-  @Prop({ required: true, default: '1X2' })
+  @Prop({ type: String, required: true, default: '1X2' })
   tipo: string;
 
   @Prop({
+    type: String,
     required: true,
     enum: ['ABIERTO', 'SUSPENDIDO', 'CERRADO'],
     default: 'ABIERTO',
@@ -33,10 +34,10 @@ export class Mercado {
   @Prop({ type: Cuotas1X2Schema, required: true })
   cuotas: Cuotas1X2Schema;
 
-  @Prop({ required: true, default: 1 })
+  @Prop({ type: Number, required: true, default: 1 })
   cuotasVersion: number;
 
-  @Prop({ required: true, default: 0.06 }) // Overround (margen de la casa, ej: 6%)
+  @Prop({ type: Number, required: true, default: 0.06 }) // Overround (margen de la casa, ej: 6%)
   margen: number;
 }
 

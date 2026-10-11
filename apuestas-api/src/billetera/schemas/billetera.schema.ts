@@ -5,13 +5,13 @@ export type BilleteraDocument = Billetera & Document;
 
 @Schema({ timestamps: true })
 export class Billetera {
-  @Prop({ required: true, unique: true, default: 'usr-demo' })
+  @Prop({ type: String, required: true, unique: true, default: 'usr-demo' })
   usuarioId: string;
 
-  @Prop({ required: true, default: 100000, min: 0 }) // 100,000 centavos = $1,000 USD
+  @Prop({ type: Number, required: true, default: 100000, min: 0 }) // 100,000 centavos = $1,000 USD
   saldoCentavos: number;
 
-  @Prop({ required: true, default: false })
+  @Prop({ type: Boolean, required: true, default: false })
   bloqueada: boolean; // Se bloquea si queda en negativo por un clawback de VAR
 }
 
