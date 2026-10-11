@@ -1,0 +1,203 @@
+<aside class="betslip-panel" aria-label="Cupón de apuestas">
+  <header class="betslip-header">
+    <div class="betslip-header__title">
+      <span class="betslip-header__icon">🎟️</span>
+      <h2>Cupón de Apuesta</h2>
+      @if (seleccion(); as sel) {
+        <span class="betslip-badge">1</span>
+      }
+    </div>
+    @if (seleccion()) {
+      <button
+        type="button"
+        class="betslip-clear-btn"
+        (click)="limpiar()"
+        [disabled]="procesando()"
+      >
+        Limpiar
+      </button>
+    }
+  </header>
+
+  @if (ticketReciente(); as ticket) {
+    <div class="betslip-banner betslip-banner--success" role="status">
+      <div class="betslip-banner__header">
+        <strong>¡Apuesta confirmada!</strong>
+        <span class="betslip-banner__tag">{{ ticket.estado }}</span>
+      </div>
+      <p class="betslip-banner__detail">
+        {{ ticket.eventoResumen.partido }} • Selección:
+        <strong>{{ ticket.seleccion }}</strong> (@{{ ticket.cuotaJugada | number: '1.2-2' }})
+      </p>
+      <p class="betslip-banner__detail">
+        Apostado: <strong>${{ (ticket.montoCentavos / 100) | number: '1.2-2' }} USD</strong> •
+        Retorno potencial:
+        <strong class="text-green">
+          ${{ (ticket.gananciaPotencialCentavos / 100) | number: '1.2-2' }} USD
+        </strong>
+      </p>
+    </div>
+  }
+
+  @if (seleccion(); as sel) {
+    <div class="betslip-card">
+      <div class="betslip-card__top">
+        <div>
+          <span class="betslip-card__league">{{ sel.evento.liga }}</span>
+          <h3 class="betslip-card__match">
+            {{ sel.evento.equipoLocal }} vs {{ sel.evento.equipoVisitante }}
+          </h3>
+        </div>
+        <span
+          class="betslip-card__status"
+          [class.betslip-card__status--live]="sel.evento.estado === 'LIVE'"
+        >
+          {{ sel.evento.estado }}
+        </span>
+      </div>
+
+      <div class="betslip-selection">
+        <div class="betslip-selection__info">
+          <span class="betslip-selection__market">Resultado 1X2</span>
+          <strong class="betslip-selection__pick">{{ etiquetaSeleccion() }}</strong>
+        </div>
+
+        <div
+          class="betslip-selection__odd"
+          [class.odd-flash--up]="tendenciaCuota() === 'sube'"
+          [class.odd-flash--down]="tendenciaCuota() === 'baja'"
+        >
+          <span class="betslip-selection__odd-value">
+            {{ sel.cuota | number: '1.2-2' }}
+          </span>
+          <small class="betslip-selection__version">v{{ sel.mercado.cuotasVersion }}</small>
+        </div>
+      </div>
+
+      @if (mercadoSuspendido() || bloqueoMensaje()) {
+        <div class="betslip-banner betslip-banner--locked" role="alert">
+          <strong>🔒 Mercado suspendido</strong>
+          <p>
+            {{
+              bloqueoMensaje() ||
+                'Mercado suspendido temporalmente por incidente en el partido.'
+            }}
+          </p>
+        </div>
+      }
+
+      @if (cuotaCambiadaAviso(); as aviso) {
+        <div class="betslip-banner betslip-banner--conflict" role="alert">
+          <strong>⚠️ Cambio de cuota detectado (HTTP 409)</strong>
+          <p>{{ aviso }}</p>
+          <button
+            type="button"
+            class="betslip-accept-btn"
+            (click)="aceptarNuevaCuotaYContinuar()"
+            [disabled]="procesando()"
+          >
+            Aceptar nueva cuota ({{ sel.cuota | number: '1.2-2' }}) y apostar
+          </button>
+        </div>
+      }
+
+      @if (errorMensaje(); as error) {
+        <div class="betslip-banner betslip-banner--error" role="alert">
+          <strong>❌ No se pudo emitir el ticket</strong>
+          <p>{{ error }}</p>
+        </div>
+      }
+
+      <div class="betslip-stake">
+        <label class="betslip-stake__label" for="betslip-monto-input">
+          Monto a apostar (USD)
+        </label>
+        <div class="betslip-stake__input-wrap">
+          <span class="betslip-stake__currency">$</span>
+          <input
+            id="betslip-monto-input"
+            type="number"
+            min="1"
+            step="1"
+            class="betslip-stake__input"
+            [ngModel]="montoUSD()"
+            (ngModelChange)="onMontoInput($event)"
+            [disabled]="procesando() || mercadoSuspendido()"
+          />
+          <span class="betslip-stake__cents">
+            {{ montoCentavos() }} centavos
+          </span>
+        </div>
+
+        <div class="betslip-quick-amounts">
+          @for (monto of montosRapidos; track monto) {
+            <button
+              type="button"
+              class="betslip-quick-btn"
+              [class.betslip-quick-btn--active]="montoUSD() === monto"
+              (click)="fijarMontoRapido(monto)"
+              [disabled]="procesando() || mercadoSuspendido()"
+            >
+              +${{ monto }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="betslip-summary">
+        <div class="betslip-summary__row">
+          <span>Cuota seleccionada</span>
+          <strong>{{ sel.cuota | number: '1.2-2' }}</strong>
+        </div>
+        <div class="betslip-summary__row">
+          <span>Monto en centavos (int)</span>
+          <code>{{ montoCentavos() }} ¢</code>
+        </div>
+        <div class="betslip-summary__row betslip-summary__row--payout">
+          <span>Ganancia potencial</span>
+          <strong class="betslip-summary__payout">
+            ${{ gananciaPotencialUSD() | number: '1.2-2' }} USD
+          </strong>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="betslip-submit-btn"
+        [disabled]="botonDeshabilitado()"
+        (click)="onConfirmar()"
+      >
+        @if (procesando()) {
+          <span>Procesando transacción ACID...</span>
+        } @else if (mercadoSuspendido()) {
+          <span>Mercado Suspendido</span>
+        } @else {
+          <span>Confirmar Apuesta • ${{ montoUSD() | number: '1.2-2' }}</span>
+        }
+      </button>
+    </div>
+  } @else {
+    <div class="betslip-empty">
+      <p class="betslip-empty__title">Tu cupón está vacío</p>
+      <p class="betslip-empty__subtitle">
+        Selecciona una cuota 1X2 en la cartelera deportiva para calcular tu ganancia potencial.
+      </p>
+      <div class="betslip-demo-actions">
+        <button
+          type="button"
+          class="betslip-demo-btn"
+          (click)="cargarSeleccionDemo('LOCAL')"
+        >
+          Probar selección Local (2.10)
+        </button>
+        <button
+          type="button"
+          class="betslip-demo-btn"
+          (click)="cargarSeleccionDemo('EMPATE')"
+        >
+          Probar Empate (3.40)
+        </button>
+      </div>
+    </div>
+  }
+</aside>
