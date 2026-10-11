@@ -4,6 +4,7 @@ import { Ticket, TicketSchema } from './schemas/ticket.schema';
 import { Mercado, MercadoSchema } from '../cuotas/schemas/mercado.schema';
 import { BilleteraModule } from '../billetera/billetera.module';
 import { ApuestasService } from './apuestas.service';
+import { ApuestasController } from './apuestas.controller';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { ApuestasService } from './apuestas.service';
     ]),
     BilleteraModule,
   ],
-  controllers: [],
+  controllers: [ApuestasController],
   providers: [ApuestasService],
 })
 export class ApuestasModule {}
