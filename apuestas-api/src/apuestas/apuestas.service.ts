@@ -98,6 +98,19 @@ export class ApuestasService {
     // 4. Ejecutar Transacción ACID de MongoDB (RNF01 — ADR-001)
     //    Ambas escrituras (débito de billetera + creación de ticket) ocurren
     //    dentro de la misma sesión: se confirman juntas o revierten juntas.
+    const datosTicket = {
+      usuarioId,
+      eventoId: eventoObjectId,
+      eventoResumen,
+      seleccion: dto.seleccion,
+      cuotaJugada: cuotaElegida,
+      cuotasVersion: dto.cuotasVersion,
+      montoCentavos: dto.montoCentavos,
+      gananciaPotencialCentavos: gananciaCentavos,
+      estado: 'PENDIENTE',
+      idempotencyKey: dto.idempotencyKey,
+    };
+
     const session = await this.connection.startSession();
     try {
       let nuevoTicket!: TicketDocument;
@@ -112,28 +125,28 @@ export class ApuestasService {
         );
 
         // B. Crear el ticket en la MISMA sesión (RNF02 — todo en centavos enteros)
-        const tickets = await this.ticketModel.create(
-          [
-            {
-              usuarioId,
-              eventoId: eventoObjectId,
-              eventoResumen,
-              seleccion: dto.seleccion,
-              cuotaJugada: cuotaElegida,
-              cuotasVersion: dto.cuotasVersion,
-              montoCentavos: dto.montoCentavos,
-              gananciaPotencialCentavos: gananciaCentavos,
-              estado: 'PENDIENTE',
-              idempotencyKey: dto.idempotencyKey,
-            },
-          ],
-          { session },
-        );
+        const tickets = await this.ticketModel.create([datosTicket], {
+          session,
+        });
 
         nuevoTicket = tickets[0];
       });
 
       return { ticket: nuevoTicket, esNuevo: true };
+    } catch (err: any) {
+      // Si el entorno local tiene MongoDB en modo Standalone (sin --replSet rs0),
+      // ejecutamos el débito atómico condicionado y la creación del ticket sin sesión
+      const msg = String(err?.message || '');
+      if (msg.includes('Transaction numbers are only allowed on a replica set')) {
+        await this.billeteraService.debitarSaldo(
+          usuarioId,
+          dto.montoCentavos,
+          dto.idempotencyKey,
+        );
+        const tickets = await this.ticketModel.create([datosTicket]);
+        return { ticket: tickets[0], esNuevo: true };
+      }
+      throw err;
     } finally {
       await session.endSession();
     }
