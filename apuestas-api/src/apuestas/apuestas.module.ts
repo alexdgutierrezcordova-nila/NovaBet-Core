@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Ticket, TicketSchema } from './schemas/ticket.schema';
 import { Mercado, MercadoSchema } from '../cuotas/schemas/mercado.schema';
 import { BilleteraModule } from '../billetera/billetera.module';
+import { ApuestasService } from './apuestas.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { BilleteraModule } from '../billetera/billetera.module';
     BilleteraModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [ApuestasService],
 })
 export class ApuestasModule {}
