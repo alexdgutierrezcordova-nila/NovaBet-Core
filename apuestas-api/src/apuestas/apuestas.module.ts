@@ -5,6 +5,7 @@ import { Mercado, MercadoSchema } from '../cuotas/schemas/mercado.schema';
 import { BilleteraModule } from '../billetera/billetera.module';
 import { ApuestasService } from './apuestas.service';
 import { ApuestasController } from './apuestas.controller';
+import { ApuestasSeedService } from './apuestas-seed.service';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { ApuestasController } from './apuestas.controller';
     BilleteraModule,
   ],
   controllers: [ApuestasController],
-  providers: [ApuestasService],
+  providers: [ApuestasService, ApuestasSeedService],
 })
 export class ApuestasModule {}
