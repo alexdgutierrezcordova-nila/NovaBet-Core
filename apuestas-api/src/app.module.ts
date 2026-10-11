@@ -4,15 +4,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ApuestasModule } from './apuestas/apuestas.module';
 import { EventosModule } from './eventos/eventos.module';
+import { CuotasModule } from './cuotas/cuotas.module';
 
 @Module({
   imports: [
     MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/novabet'),
     EventosModule,
-    // Aquí cada integrante registrará su módulo al programarlo:
-    // EventosModule,
+    CuotasModule,
     ApuestasModule,
-    // UsuarioModule
   ],
   controllers: [AppController],
   providers: [AppService],
