@@ -1,0 +1,231 @@
+.novabet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem;
+  background-color: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  user-select: none;
+
+  .brand-icon {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px rgba(0, 230, 118, 0.6));
+    animation: pulse-glow 2.5s infinite ease-in-out;
+  }
+
+  .brand-title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+
+    .brand-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+
+      .highlight {
+        color: var(--accent-green);
+      }
+    }
+
+    .brand-tag {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+    }
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toast-feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(0, 230, 118, 0.15);
+  border: 1px solid var(--accent-green);
+  color: var(--accent-green);
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: slideIn 0.3s ease-out;
+
+  .check-icon {
+    font-weight: bold;
+  }
+}
+
+.wallet-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba(0, 230, 118, 0.5);
+    box-shadow: 0 0 12px rgba(0, 230, 118, 0.15);
+  }
+
+  &.loading {
+    opacity: 0.7;
+  }
+
+  .wallet-icon {
+    font-size: 1.25rem;
+  }
+
+  .wallet-info {
+    display: flex;
+    flex-direction: column;
+
+    .wallet-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    .wallet-amount {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--accent-green);
+    box-shadow: 0 0 6px var(--accent-green);
+    animation: blink 2s infinite ease-in-out;
+  }
+}
+
+.btn-recarga {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #00e676, #00b0ff);
+  color: #0b0e14;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  user-select: none;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+    filter: brightness(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .plus-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    border-top-color: #0b0e14;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  user-select: none;
+
+  .avatar {
+    font-size: 1rem;
+  }
+
+  .user-name {
+    font-weight: 600;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(0, 230, 118, 0.6)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 16px rgba(0, 230, 118, 0.85)); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .novabet-header {
+    padding: 0.6rem 1rem;
+  }
+
+  .user-pill {
+    display: none;
+  }
+
+  .brand .brand-title .brand-tag {
+    display: none;
+  }
+}

@@ -1,0 +1,53 @@
+<header class="novabet-header">
+  <div class="header-left">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <div class="brand-title">
+        <span class="brand-name">NOVA<span class="highlight">BET</span></span>
+        <span class="brand-tag">SPORTSBOOK</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <!-- Feedback flotante de recarga -->
+    @if (mensajeFeedback()) {
+      <div class="toast-feedback" role="status">
+        <span class="check-icon">✓</span>
+        {{ mensajeFeedback() }}
+      </div>
+    }
+
+    <!-- Panel de Saldo del Usuario (Módulo 3) -->
+    <div class="wallet-badge" [class.loading]="cargando()">
+      <div class="wallet-icon">💳</div>
+      <div class="wallet-info">
+        <span class="wallet-label">SALDO DISPONIBLE</span>
+        <span class="wallet-amount">{{ saldoFormateado() }}</span>
+      </div>
+      <span class="live-dot" title="Sincronizado en tiempo real"></span>
+    </div>
+
+    <!-- Botón Rápido de Recarga Virtual (RF05) -->
+    <button 
+      type="button" 
+      class="btn-recarga" 
+      (click)="recargar()" 
+      [disabled]="recargando()"
+      title="Añadir $500.00 USD de saldo virtual">
+      @if (recargando()) {
+        <span class="spinner"></span>
+        <span>Recargando...</span>
+      } @else {
+        <span class="plus-icon">+</span>
+        <span>Recargar $500</span>
+      }
+    </button>
+
+    <!-- Avatar del usuario demo -->
+    <div class="user-pill" title="Cuenta Demo de Pruebas">
+      <span class="avatar">👤</span>
+      <span class="user-name">Demo</span>
+    </div>
+  </div>
+</header>
