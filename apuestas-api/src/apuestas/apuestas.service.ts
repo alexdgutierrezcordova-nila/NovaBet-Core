@@ -107,4 +107,11 @@ export class ApuestasService {
       await session.endSession();
     }
   }
+
+  async obtenerHistorial(usuarioId = 'usr-demo') {
+    return this.ticketModel
+      .find({ usuarioId })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
 }
