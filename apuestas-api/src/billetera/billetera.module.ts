@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Billetera, BilleteraSchema } from './schemas/billetera.schema.js';
-import { Transaccion, TransaccionSchema } from './schemas/transaccion.schema.js';
-import { BilleteraService } from './billetera.service.js';
-import { BilleteraController } from './billetera.controller.js';
+import { Billetera, BilleteraSchema } from './schemas/billetera.schema';
+import { Transaccion, TransaccionSchema } from './schemas/transaccion.schema';
+import { BilleteraService } from './billetera.service';
+import { BilleteraController } from './billetera.controller';
 
 /**
  * @class BilleteraModule
@@ -21,11 +21,11 @@ import { BilleteraController } from './billetera.controller.js';
   imports: [
     MongooseModule.forFeature([
       { name: Billetera.name, schema: BilleteraSchema },
-      { name: Transaccion.name, schema: TransaccionSchema }
-    ])
+      { name: Transaccion.name, schema: TransaccionSchema },
+    ]),
   ],
   controllers: [BilleteraController],
   providers: [BilleteraService],
-  exports: [BilleteraService]
+  exports: [BilleteraService],
 })
 export class BilleteraModule {}

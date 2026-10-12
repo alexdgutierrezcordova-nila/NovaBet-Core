@@ -25,7 +25,7 @@ export class Billetera {
    * Identificador único de usuario propietario de la billetera.
    * En este MVP se asigna el usuario por defecto 'usr-demo'.
    */
-  @Prop({ required: true, unique: true, default: 'usr-demo' })
+  @Prop({ type: String, required: true, unique: true, default: 'usr-demo' })
   usuarioId: string;
 
   /**
@@ -33,7 +33,7 @@ export class Billetera {
    * Valor inicial por defecto: 100,000 centavos ($1,000.00 USD).
    * Restricción min: 0 asegura que ninguna operación normal permita saldo negativo.
    */
-  @Prop({ required: true, default: 100000, min: 0 })
+  @Prop({ type: Number, required: true, default: 100000, min: 0 })
   saldoCentavos: number;
 
   /**
@@ -41,7 +41,7 @@ export class Billetera {
    * Se marca en `true` si una reversión por VAR (clawback) deja el saldo
    * en negativo, requiriendo revisión administrativa antes de nuevas apuestas.
    */
-  @Prop({ required: true, default: false })
+  @Prop({ type: Boolean, required: true, default: false })
   bloqueada: boolean;
 }
 

@@ -7,8 +7,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession } from 'mongoose';
 import * as crypto from 'crypto';
-import { Billetera, BilleteraDocument } from './schemas/billetera.schema.js';
-import { Transaccion, TransaccionDocument } from './schemas/transaccion.schema.js';
+import { Billetera, BilleteraDocument } from './schemas/billetera.schema';
+import { Transaccion, TransaccionDocument } from './schemas/transaccion.schema';
 
 /**
  * @class BilleteraService
@@ -80,7 +80,7 @@ export class BilleteraService implements OnModuleInit {
   }
 
   /**
-   * Débito atómico de saldo utilizado por el Módulo de Apuestas (M2).
+   * Débito atómico de saldo utilizado por el Módulo de Apuestas (M2 - Carlos).
    * 
    * @param usuarioId ID del usuario
    * @param montoCentavos Importe a descontar (en centavos enteros)
@@ -126,7 +126,7 @@ export class BilleteraService implements OnModuleInit {
       if (billeteraExistente.bloqueada) {
         throw new BadRequestException('Operación rechazada: La cuenta se encuentra bloqueada');
       }
-      throw new BadRequestException('Saldo insuficiente para realizar la apuesta');
+      throw new BadRequestException('Saldo insuficiente o billetera bloqueada');
     }
 
     // 2. Asiento contable en el Libro Mayor (Ledger) dentro de la MISMA sesión
@@ -173,6 +173,10 @@ export class BilleteraService implements OnModuleInit {
         upsert: true
       }
     ).exec();
+
+    if (!billetera) {
+      throw new NotFoundException(`Error al procesar recarga para usuario '${usuarioId}'`);
+    }
 
     // 2. Asentar en el Libro Mayor
     await this.transaccionModel.create({

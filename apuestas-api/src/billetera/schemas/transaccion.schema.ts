@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-
 /**
  * Representa el tipo de documento Mongoose para el Libro Mayor de Transacciones.
  */
@@ -36,13 +35,14 @@ export class Transaccion {
   /**
    * Identificador del usuario involucrado en la transacción.
    */
-  @Prop({ required: true, index: true })
+  @Prop({ type: String, required: true, index: true })
   usuarioId: string;
 
   /**
    * Tipo de movimiento contable.
    */
   @Prop({ 
+    type: String,
     required: true, 
     enum: ['RECARGA', 'APUESTA', 'PREMIO', 'REEMBOLSO', 'CLAWBACK'] 
   })
@@ -53,33 +53,30 @@ export class Transaccion {
    * Valores positivos: Entradas de dinero (RECARGA, PREMIO, REEMBOLSO).
    * Valores negativos: Salidas de dinero (APUESTA, CLAWBACK).
    */
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   montoCentavos: number;
 
   /**
    * Identificador del ticket de apuesta vinculado (opcional).
    * Presente cuando el tipo es APUESTA o PREMIO.
    */
-  @Prop({ required: false, index: true })
+  @Prop({ type: String, required: false, index: true })
   ticketId?: string;
 
   /**
    * Identificador del evento deportivo asociado (opcional).
    */
-  @Prop({ required: false })
+  @Prop({ type: String, required: false })
   eventoId?: string;
 
   /**
    * Clave única de idempotencia generada para la operación.
    * Evita transacciones duplicadas ante fallos transitorios de red.
    */
-  @Prop({ required: true, unique: true })
+  @Prop({ type: String, required: true, unique: true })
   referenciaIdempotente: string;
 }
 
-/**
- * Generación del esquema Mongoose.
- */
 export const TransaccionSchema = SchemaFactory.createForClass(Transaccion);
 
 /**

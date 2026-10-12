@@ -149,6 +149,8 @@ export class Historial implements OnInit, OnDestroy {
         },
         seleccion: 'LOCAL',
         cuotaJugada: 2.15,
+        cuotasVersion: 1,
+        idempotencyKey: 'demo-key-001',
         montoCentavos: 2500, // $25.00 USD
         gananciaPotencialCentavos: 5375, // $53.75 USD
         estado: 'PENDIENTE',
@@ -164,6 +166,8 @@ export class Historial implements OnInit, OnDestroy {
         },
         seleccion: 'EMPATE',
         cuotaJugada: 3.40,
+        cuotasVersion: 1,
+        idempotencyKey: 'demo-key-002',
         montoCentavos: 1000, // $10.00 USD
         gananciaPotencialCentavos: 3400, // $34.00 USD
         estado: 'GANADA',
@@ -179,6 +183,8 @@ export class Historial implements OnInit, OnDestroy {
         },
         seleccion: 'VISITANTE',
         cuotaJugada: 2.85,
+        cuotasVersion: 1,
+        idempotencyKey: 'demo-key-003',
         montoCentavos: 1500, // $15.00 USD
         gananciaPotencialCentavos: 4275, // $42.75 USD
         estado: 'PERDIDA',
