@@ -1,0 +1,107 @@
+<div class="historial-container">
+  <!-- Cabecera del Panel -->
+  <div class="historial-header">
+    <div class="header-title">
+      <span class="icon">📜</span>
+      <h3>Mis Apuestas</h3>
+    </div>
+    <button type="button" class="btn-refresh" (click)="cargarHistorial()" title="Actualizar historial">
+      🔄
+    </button>
+  </div>
+
+  <!-- Barra de Filtros de Estado -->
+  <div class="filtros-bar">
+    <button 
+      type="button" 
+      class="chip-filtro" 
+      [class.activo]="filtroActivo() === 'TODOS'" 
+      (click)="setFiltro('TODOS')">
+      Todos
+    </button>
+    <button 
+      type="button" 
+      class="chip-filtro chip-pendiente" 
+      [class.activo]="filtroActivo() === 'PENDIENTE'" 
+      (click)="setFiltro('PENDIENTE')">
+      Pendientes
+    </button>
+    <button 
+      type="button" 
+      class="chip-filtro chip-ganada" 
+      [class.activo]="filtroActivo() === 'GANADA'" 
+      (click)="setFiltro('GANADA')">
+      Ganadas
+    </button>
+    <button 
+      type="button" 
+      class="chip-filtro chip-perdida" 
+      [class.activo]="filtroActivo() === 'PERDIDA'" 
+      (click)="setFiltro('PERDIDA')">
+      Perdidas
+    </button>
+  </div>
+
+  <!-- Estado de Carga -->
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <span>Cargando tickets...</span>
+    </div>
+  }
+
+  <!-- Lista de Tickets -->
+  <div class="tickets-list">
+    @for (ticket of ticketsFiltrados(); track ticket._id) {
+      <article class="ticket-card" [attr.data-estado]="ticket.estado">
+        <!-- Encabezado de la tarjeta -->
+        <div class="ticket-top">
+          <div class="liga-info">
+            <span class="liga-name">{{ ticket.eventoResumen.liga }}</span>
+            <span class="ticket-date">{{ formatearFecha(ticket.createdAt || ticket.creadoEn) }}</span>
+          </div>
+
+          <!-- Badge de Estado según RF07 y RNF01 -->
+          <span class="estado-badge" [ngClass]="'badge-' + ticket.estado.toLowerCase()">
+            @switch (ticket.estado) {
+              @case ('PENDIENTE') { 🟡 Pendiente }
+              @case ('GANADA') { 🟢 Ganada }
+              @case ('PERDIDA') { 🔴 Perdida }
+              @default { ⚪ {{ ticket.estado }} }
+            }
+          </span>
+        </div>
+
+        <!-- Cuerpo: Partido y Selección -->
+        <div class="ticket-match">
+          <span class="match-name">{{ ticket.eventoResumen.partido }}</span>
+        </div>
+
+        <div class="ticket-selection">
+          <span class="sel-label">Selección:</span>
+          <span class="sel-value">{{ ticket.seleccion }}</span>
+          <span class="sel-cuota">&#64; {{ ticket.cuotaJugada.toFixed(2) }}</span>
+        </div>
+
+        <!-- Pie de Tarjeta: Montos Financieros -->
+        <div class="ticket-bottom">
+          <div class="monto-col">
+            <span class="lbl">Apostado:</span>
+            <span class="val">{{ formatearMonto(ticket.montoCentavos, ticket.montoApostado) }}</span>
+          </div>
+          <div class="ganancia-col">
+            <span class="lbl">Ganancia Potencial:</span>
+            <span class="val-ganancia" [class.es-ganada]="ticket.estado === 'GANADA'">
+              {{ formatearMonto(ticket.gananciaPotencialCentavos, ticket.gananciaPotencial) }}
+            </span>
+          </div>
+        </div>
+      </article>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon">🎫</span>
+        <p>No hay apuestas en esta categoría.</p>
+      </div>
+    }
+  </div>
+</div>

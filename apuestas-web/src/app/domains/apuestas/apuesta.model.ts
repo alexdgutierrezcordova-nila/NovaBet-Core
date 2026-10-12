@@ -4,7 +4,7 @@ export type EstadoTicket = 'PENDIENTE' | 'GANADA' | 'PERDIDA' | 'ANULADA';
 
 export interface TicketApuesta {
   _id: string;                    // MongoDB ObjectId serializado como string
-  usuarioId: string;              // Siempre 'usr-demo' para este MVP
+  usuarioId: string;              // 'usr-demo'
   eventoId: string;
   eventoResumen: {
     partido: string;
@@ -12,9 +12,14 @@ export interface TicketApuesta {
   };
   seleccion: OpcionSeleccionada;
   cuotaJugada: number;
-  montoApostado: number;
-  gananciaPotencial: number;
+  cuotasVersion?: number;
+  montoCentavos?: number;         // Estándar v2 en centavos (ej: 1000 = $10.00 USD)
+  montoApostado?: number;         // Compatibilidad v1 en dólares
+  gananciaPotencialCentavos?: number;
+  gananciaPotencial?: number;
   estado: EstadoTicket;
-  creadoEn: string;
+  idempotencyKey?: string;
+  createdAt?: string;
+  creadoEn?: string;
   resueltoEn?: string;
 }
