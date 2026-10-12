@@ -43,7 +43,7 @@ export class CuotasStreamService implements OnDestroy {
    * Es seguro llamarlo múltiples veces: si ya hay una conexión abierta no crea otra.
    */
   conectar(): void {
-    // Guard SSR / Unit Tests: EventSource sólo existe en entornos con soporte nativo
+    // Guard SSR y Entornos sin EventSource (ej. Vitest / Node)
     if (!isPlatformBrowser(this.platformId) || typeof EventSource === 'undefined') return;
 
     // No abrir una segunda conexión si ya está activa

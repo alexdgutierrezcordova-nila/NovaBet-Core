@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/betslip/betslip').then((m) => m.Betslip),
+      import('./features/cartelera/cartelera').then((m) => m.Cartelera),
   },
   {
     path: 'betslip',

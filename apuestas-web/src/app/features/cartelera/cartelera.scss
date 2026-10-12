@@ -1,0 +1,307 @@
+.cartelera-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.cartelera-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .badge-total {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--border-active);
+      font-weight: 600;
+    }
+  }
+
+  .btn-refrescar {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+      border-color: var(--border-active);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.estado-cargando,
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  gap: 1rem;
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: girar 0.8s linear infinite;
+  }
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alerta-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-perdida);
+
+  .btn-reintentar {
+    margin-left: auto;
+    background: var(--color-perdida);
+    color: white;
+    border: none;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
+.grid-partidos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.tarjeta-partido {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  &.partido-live {
+    border-left: 3px solid var(--color-perdida);
+  }
+
+  .tarjeta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .liga {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .badge-estado {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-muted);
+      font-weight: 700;
+
+      &.live {
+        background: rgba(239, 68, 68, 0.18);
+        color: var(--color-perdida);
+        animation: pulso 1.5s infinite;
+      }
+    }
+  }
+
+  .equipos-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+
+    .equipo {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      flex: 1;
+
+      &.equipo-local {
+        align-items: flex-start;
+      }
+
+      &.equipo-visitante {
+        align-items: flex-end;
+      }
+
+      .nombre {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-primary);
+      }
+
+      .goles {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--accent-gold);
+      }
+    }
+
+    .vs-divider {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-dim);
+      padding: 0 0.75rem;
+    }
+  }
+
+  .fecha-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  .mercado-cuotas {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .cuotas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .tipo-mercado {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .badge-suspendido {
+        font-size: 0.68rem;
+        color: var(--color-pendiente);
+        font-weight: 600;
+      }
+    }
+
+    .cuotas-botones {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+
+      .btn-cuota {
+        background: var(--bg-surface-hover);
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        cursor: pointer;
+        color: var(--text-primary);
+        transition: all 0.15s ease;
+
+        .etiqueta {
+          font-size: 0.65rem;
+          color: var(--text-muted);
+          font-weight: 700;
+        }
+
+        .valor {
+          font-size: 0.95rem;
+          font-weight: 800;
+          color: var(--accent-green);
+        }
+
+        &:hover:not(:disabled) {
+          border-color: var(--accent-green);
+          background: rgba(0, 230, 118, 0.08);
+          transform: translateY(-1px);
+        }
+
+        &.seleccionada {
+          background: rgba(0, 230, 118, 0.2);
+          border-color: var(--accent-green);
+          box-shadow: 0 0 10px rgba(0, 230, 118, 0.25);
+
+          .etiqueta {
+            color: var(--accent-green);
+          }
+        }
+
+        &:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
+          filter: grayscale(1);
+        }
+      }
+    }
+  }
+
+  .sin-mercado {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.75rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+}
+
+@keyframes pulso {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

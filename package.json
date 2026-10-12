@@ -1,0 +1,13 @@
+{
+  "name": "novabet-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NovaBet Core Monorepo",
+  "scripts": {
+    "start:api": "pnpm --filter apuestas-api run start:dev",
+    "start:web": "pnpm --filter apuestas-web run start",
+    "build:api": "pnpm --filter apuestas-api run build",
+    "build:web": "pnpm --filter apuestas-web run build",
+    "build": "pnpm --filter apuestas-api run build && pnpm --filter apuestas-web run build"
+  }
+}
