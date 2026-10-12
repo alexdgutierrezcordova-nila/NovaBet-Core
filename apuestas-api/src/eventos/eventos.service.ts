@@ -4,11 +4,15 @@ import {
   NotFoundException,
   ConflictException,
   Logger,
+  Optional,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Evento, EventoDocument } from './schemas/evento.schema';
 import { Mercado, MercadoDocument } from '../cuotas/schemas/mercado.schema';
+import { Ticket, TicketDocument } from '../apuestas/schemas/ticket.schema';
+import { BilleteraService } from '../billetera/billetera.service';
 
 @Injectable()
 export class EventosService implements OnModuleInit {
@@ -19,6 +23,12 @@ export class EventosService implements OnModuleInit {
     private readonly eventoModel: Model<EventoDocument>,
     @InjectModel(Mercado.name)
     private readonly mercadoModel: Model<MercadoDocument>,
+    @Optional()
+    @InjectModel(Ticket.name)
+    private readonly ticketModel?: Model<TicketDocument>,
+    @Optional()
+    @Inject(BilleteraService)
+    private readonly billeteraService?: BilleteraService,
   ) {}
 
   async onModuleInit() {
@@ -168,7 +178,8 @@ export class EventosService implements OnModuleInit {
   }
 
   /**
-   * Actualiza el resultado final del evento y cierra su mercado.
+   * Actualiza el resultado final del evento, cierra su mercado
+   * y liquida automáticamente todos los boletos asociados (RF1.4).
    */
   async actualizarResultado(
     id: string,
@@ -191,7 +202,7 @@ export class EventosService implements OnModuleInit {
     }
     await evento.save();
 
-    // Cerrar el mercado asociado y subir versión
+    // 1. Cerrar el mercado asociado y subir versión
     await this.mercadoModel.updateOne(
       { eventoId: evento._id },
       {
@@ -199,6 +210,39 @@ export class EventosService implements OnModuleInit {
         $inc: { cuotasVersion: 1 },
       },
     );
+
+    // 2. Liquidación de apuestas pendientes asociadas a este evento (RF1.4)
+    if (this.ticketModel) {
+      const ticketsPendientes = await this.ticketModel.find({
+        eventoId: evento._id,
+        estado: 'PENDIENTE',
+      });
+
+      for (const ticket of ticketsPendientes) {
+        const esGanador = ticket.seleccion === resultado;
+        ticket.estado = esGanador ? 'GANADA' : 'PERDIDA';
+        ticket.resueltoEn = new Date();
+        await ticket.save();
+
+        // Si acertó la selección, acreditar ganancias a la billetera del usuario
+        if (esGanador && this.billeteraService) {
+          try {
+            await this.billeteraService.recargarSaldo(
+              ticket.usuarioId,
+              ticket.gananciaPotencialCentavos,
+            );
+            this.logger.log(
+              `🏆 [Liquidación]: Ticket ${ticket._id} GANADOR acreditado con ${ticket.gananciaPotencialCentavos} centavos.`,
+            );
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            this.logger.error(
+              `Error al abonar premio para ticket ${ticket._id}: ${msg}`,
+            );
+          }
+        }
+      }
+    }
 
     return evento;
   }
